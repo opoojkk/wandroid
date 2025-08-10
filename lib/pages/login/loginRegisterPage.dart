@@ -4,7 +4,6 @@ import '../../common/Router.dart' show Router;
 import '../../common/Snack.dart';
 import '../../common/User.dart';
 import '../../widget/BackBtn.dart';
-import '../../widget/ClearableInputField.dart';
 
 class LoginRegisterPage extends StatefulWidget {
   const LoginRegisterPage({super.key});
@@ -14,18 +13,20 @@ class LoginRegisterPage extends StatefulWidget {
 }
 
 class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
-  bool isLogin = true;
-  late ClearableInputField _userNameInputForm;
-  late ClearableInputField _psdInputForm;
+  OperateMode operateMode = OperateMode.login;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _psdController = TextEditingController();
+
+  bool get login {
+    return operateMode == OperateMode.login;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: BackBtn(),
-        title: Text(isLogin ? "登录" : "注册"),
+        title: Text(login ? "登录" : "注册"),
         actions: [_buildRegBtn()],
       ),
       body: Builder(
@@ -41,10 +42,6 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
               SizedBox(height: 24.0),
               _buildLoginBtn(ct),
               SizedBox(height: 10.0),
-              // Container(
-              //   child: _buildRegBtn(),
-              //   alignment: Alignment.centerRight,
-              // ),
             ],
           );
         },
@@ -54,7 +51,7 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
 
   Widget _buildLoginBtn(BuildContext context) {
     return FilledButton(
-      child: Text(isLogin ? "登录" : "注册并登录"),
+      child: Text(login ? "登录" : "注册并登录"),
       onPressed: () {
         var userNameStr = _userNameController.text;
         var psdStr = _psdController.text;
@@ -71,7 +68,7 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
             }
           }
 
-          isLogin
+          login
               ? User().login(
                   username: userNameStr,
                   password: psdStr,
@@ -88,29 +85,37 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
   }
 
   Widget _buildUserNameInputForm() {
-    _userNameInputForm = ClearableInputField(
-      controller: _userNameController,
-      inputType: TextInputType.emailAddress,
-      hintTxt: '用户名',
+    return TextField(
+      obscureText: false,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: '用户名',
+      ),
     );
-    return _userNameInputForm;
   }
 
   Widget _buildPsdInputForm() {
-    _psdInputForm = ClearableInputField(
-      controller: _psdController,
+    return TextField(
       obscureText: true,
-      hintTxt: '密码',
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: '密码',
+      ),
     );
-    return _psdInputForm;
   }
 
   Widget _buildRegBtn() {
     return FilledButton(
-      child: Text(isLogin ? '注册' : '登录'),
+      child: Text(login ? '注册' : '登录'),
       onPressed: () {
         setState(() {
-          isLogin = !isLogin;
+          switch (operateMode) {
+            case OperateMode.login:
+              operateMode = OperateMode.register;
+            case OperateMode.register:
+              operateMode = OperateMode.login;
+          }
+          ;
         });
       },
     );
@@ -123,3 +128,5 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
     super.dispose();
   }
 }
+
+enum OperateMode { login, register }
