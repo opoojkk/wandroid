@@ -2,21 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:wandroid/network/service/searchService.dart';
 
 import '../../widget/BackBtn.dart';
-import '../../widget/ClearableInputField.dart';
 import '../articleList/articleListPage.dart';
 
 class SearchDetailPage extends StatefulWidget {
-  SearchDetailPage();
+  const SearchDetailPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => new _SearchDetailPageState();
+  State<StatefulWidget> createState() => _SearchDetailPageState();
 }
 
 class _SearchDetailPageState extends State<SearchDetailPage> {
   String _key = "";
-  GlobalKey<ArticleListPageState> _itemListPage = new GlobalKey();
+  final GlobalKey<ArticleListPageState> _itemListPage = GlobalKey();
   final String loadingMsg = "Search whatever you want";
-  var _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   @override
   void initState() {
@@ -40,13 +39,20 @@ class _SearchDetailPageState extends State<SearchDetailPage> {
   AppBar _buildAppbar(BuildContext context) {
     return AppBar(
       leading: BackBtn(),
-      title: ClearableInputField(
-        hintTxt: "搜索",
+      title: TextFormField(
         controller: _controller,
-        border: InputBorder.none,
-        onchange: (str) {
-          print("print:${str}");
-          _key = str;
+        decoration: InputDecoration(
+          hintText: '搜索',
+          suffixIcon: InkWell(
+            borderRadius: BorderRadius.circular(40),
+            onTap: () {
+              _controller.clear();
+            },
+            child: Icon(Icons.close),
+          ),
+        ),
+        onChanged: (content) {
+          _key = content;
           _itemListPage.currentState?.handleRefresh();
         },
       ),
