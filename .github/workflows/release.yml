@@ -1,0 +1,60 @@
+name: Build & Release APK
+
+on:
+  push:
+    tags:
+      - "v*"   # 触发条件：推送 tag，如 v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 拉取代码
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 安装 JDK（Gradle 和 Android 构建需要）
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 安装 Flutter
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.22.0" # 根据你项目的版本修改
+
+      # 还原 jks 签名文件（提前存到 GitHub Secrets）
+      - name: Decode Keystore
+        run: echo ${{ secrets.ANDROID_KEYSTORE_BASE64 }} | base64 --decode > android/app/my-release-key.jks
+
+      # 构建 APK
+      - name: Build APK
+        run: flutter build apk --release
+        env:
+          KEYSTORE_FILE: android/app/my-release-key.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      # 构建 AAB（可选，用于 Google Play 发布）
+      - name: Build AAB
+        run: flutter build appbundle --release
+        env:
+          KEYSTORE_FILE: android/app/my-release-key.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      # 发布到 GitHub Release
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
