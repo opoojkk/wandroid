@@ -87,37 +87,4 @@ class User {
     });
   }
 
-  void _saveUserInfo(
-    Future<Response> responseF,
-    String userName,
-    String password, {
-    Function? callback,
-  }) {
-    responseF.then((response) {
-      var userModel = UserModel.fromJson(response.data);
-      if (userModel.errorCode == 0) {
-        Sp.putUserName(userName);
-        Sp.putPassword(password);
-        String cookie = "";
-        DateTime expires = DateTime.now();
-        response.headers.forEach((String name, List<String> values) {
-          if (name == "set-cookie") {
-            cookie = json
-                .encode(values)
-                .replaceAll("\[\"", "")
-                .replaceAll("\"\]", "")
-                .replaceAll("\",\"", "; ");
-            try {
-              expires = DateUtil.formatExpiresTime(cookie) ?? DateTime.now();
-            } catch (e) {}
-          }
-        });
-        Sp.putCookie(cookie);
-        Sp.putCookieExpires(expires.toIso8601String());
-        callback?.call(true, "");
-      } else {
-        callback?.call(false, userModel.errorMsg);
-      }
-    });
-  }
 }
