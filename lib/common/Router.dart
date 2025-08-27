@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wandroid/network/service/collectService.dart';
 import 'package:wandroid/network/service/homeService.dart';
 
 import '../model/articleList/ArticleItemModel.dart';
@@ -60,7 +61,7 @@ class Router {
         builder: (BuildContext context) {
           return FavoritePage(
             request: (page) {
-              return HomeService.getArticleListData(0);
+              return CollectService.getCollectListData(0);
             },
           );
         },

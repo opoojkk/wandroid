@@ -12,7 +12,7 @@ class CollectUtil {
     ArticleItemModel model,
     Function callback,
   ) {
-    if (!User().isLogin()) {
+    if (!User.instance.isLogin()) {
       callback(false, "收藏需要先登录哈");
     } else {
       if (model.collect) {

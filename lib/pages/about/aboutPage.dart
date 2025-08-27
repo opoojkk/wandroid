@@ -81,19 +81,20 @@ class _AboutPageState extends State<AboutPage> {
 
   Column _buildAboutHeader() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 6),
         Text(
           '基于玩Android api实现的flutter客户端',
           style: TextStyle(
-            fontSize: 14,
-            color: Colors.black.withValues(alpha: 0.6),
+            fontSize: 16,
+            // color: Colors.black.withValues(alpha: 0.6),
           ),
         ),
         SizedBox(height: 6),
         Row(
           children: [
-            Text('fork自原仓库: '),
+            Text('fork并修改自原仓库: ', style: TextStyle(fontSize: 16)),
             InkWell(
               child: Text(
                 'hurshi/wanandroid',
@@ -105,7 +106,7 @@ class _AboutPageState extends State<AboutPage> {
             ),
           ],
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 18),
         Text('开源协议', style: TextStyle(fontSize: 16)),
         SizedBox(height: 4),
       ],

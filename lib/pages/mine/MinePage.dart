@@ -1,14 +1,31 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wandroid/common/event/eventbus.dart';
 import 'package:wandroid/network/api/avatar.dart';
 
 import '../../common/Router.dart';
 import '../../common/User.dart';
+import '../../common/event/event.dart';
 import '../about/aboutPage.dart';
 import 'MineItem.dart';
 
+class LoginNotifier extends ChangeNotifier {
+  bool _isLogin = User.instance.isLogin();
+
+  bool get isLogin => _isLogin;
+
+  void updateLoginStatus() {
+    _isLogin = User.instance.isLogin();
+    notifyListeners();
+  }
+}
+
 class MinePage extends StatefulWidget {
+  const MinePage({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _MinePageState();
@@ -16,6 +33,27 @@ class MinePage extends StatefulWidget {
 }
 
 class _MinePageState extends State<MinePage> {
+  bool _isLogin = User.instance.isLogin();
+  late StreamSubscription _loginSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _loginSubscription = EventDriver.instance.eventBus.on<LoginEvent>().listen((
+      event,
+    ) {
+      setState(() {
+        _isLogin = event.isLogin;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _loginSubscription.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<MineItem> items = [
@@ -50,7 +88,7 @@ class _MinePageState extends State<MinePage> {
         icon: Icons.coffee,
         onTap: (context) {
           launchUrl(
-            Uri.parse("https://github.com/opoojkk/wanandroid"),
+            Uri.parse("https://github.com/opoojkk/wandroid"),
             mode: LaunchMode.externalApplication,
           );
         },
@@ -64,32 +102,25 @@ class _MinePageState extends State<MinePage> {
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 10),
             // padding: const EdgeInsets.all(0),
-            child: Container(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: items.length,
-                // separatorBuilder: (context, index) => const Divider(
-                //       height: 1,
-                //       thickness: 1.5,
-                //       endIndent: 16,
-                //     ),
-                itemBuilder: (context, index) {
-                  MineItem item = items[index];
-                  return _buildListItem(context, items, index, item);
-                },
-              ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                MineItem item = items[index];
+                return _buildListItem(context, items, index, item);
+              },
             ),
           ),
         ],
       ),
       bottomNavigationBar: Container(
+        padding: EdgeInsets.only(bottom: 8),
         child: Text(
           'have a nice day!',
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.black.withValues(alpha: 0.4)),
         ),
-        padding: EdgeInsets.only(bottom: 8),
       ),
     );
   }
@@ -131,18 +162,15 @@ class _MinePageState extends State<MinePage> {
   }
 
   Widget _buildHead(BuildContext context) {
-    return Container(
-      // decoration: BoxDecoration(color: GlobalConfig.colorPrimary),
-      child: GestureDetector(
-        onTap: () {
-          if (User().isLogin())
-            _showLogout(context);
-          else {
-            _toLogin(context);
-          }
-        },
-        child: _buildAvatar(),
-      ),
+    return GestureDetector(
+      onTap: () {
+        if (_isLogin) {
+          _showLogout(context);
+        } else {
+          _toLogin(context);
+        }
+      },
+      child: _buildAvatar(),
     );
   }
 
@@ -160,7 +188,7 @@ class _MinePageState extends State<MinePage> {
   }
 
   Widget _buildUserInfo() {
-    if (User().isLogin()) {
+    if (_isLogin) {
       return _avatarTemplateLayout(
         User.currentUser()?.username ?? "",
         "${Avatar.avatarCoding}${getUserName().hashCode % 20 + 1}.png",
@@ -234,7 +262,8 @@ class _MinePageState extends State<MinePage> {
             backgroundColor: Colors.transparent,
           ),
           onPressed: () {
-            User().logout();
+            User.instance.logout();
+            EventDriver.instance.eventBus.fire(LoginEvent(false));
             Navigator.pop(context);
           },
           child: Text("确定"),

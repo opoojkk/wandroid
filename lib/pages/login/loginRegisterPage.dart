@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
+import 'package:wandroid/common/event/event.dart';
+import 'package:wandroid/common/event/eventbus.dart';
 
 import '../../common/Router.dart' show Router;
 import '../../common/Snack.dart';
@@ -55,11 +57,12 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
       onPressed: () {
         var userNameStr = _userNameController.text;
         var psdStr = _psdController.text;
-        if (userNameStr.length < 6 || psdStr.length < 6) {
-          "账号和密码均需大于6位".showSnack(context);
+        if (userNameStr.isEmpty || psdStr.isEmpty) {
+          "账号和密码不能为空".showSnack(context);
         } else {
           callback(bool loginOK, String? errorMsg) {
             if (loginOK) {
+              EventDriver.instance.eventBus.fire(LoginEvent(true));
               Router().back(context);
             } else {
               if (errorMsg != null && errorMsg.isNotEmpty) {
@@ -69,12 +72,12 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
           }
 
           login
-              ? User().login(
+              ? User.instance.login(
                   username: userNameStr,
                   password: psdStr,
                   callback: callback,
                 )
-              : User().register(
+              : User.instance.register(
                   username: userNameStr,
                   password: psdStr,
                   callback: callback,
@@ -87,6 +90,7 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
   Widget _buildUserNameInputForm() {
     return TextField(
       obscureText: false,
+      controller: _userNameController,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: '用户名',
@@ -96,6 +100,7 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
 
   Widget _buildPsdInputForm() {
     return TextField(
+      controller: _psdController,
       obscureText: true,
       decoration: InputDecoration(
         border: OutlineInputBorder(),

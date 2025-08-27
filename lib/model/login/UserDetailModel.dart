@@ -28,4 +28,6 @@ class UserDetailModel {
 
   factory UserDetailModel.fromJson(Map<String, dynamic> json) =>
       _$UserDetailModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserDetailModelToJson(this);
 }
