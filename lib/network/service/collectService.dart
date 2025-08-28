@@ -1,17 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:wandroid/network/api/collect.dart';
 
+import '../const.dart';
+import '../dioClient.dart';
+
 class CollectService {
  static Future<Response> getCollectListData(int page) async {
-    return await Dio().get("${Collect.collectList}$page/json");
+    return await DioClient.getDio().get("${Collect.collectList}$page/json");
   }
 
  static  Future<Response> collectInArticles(int id) async {
-    return await Dio().post("${Collect.collectInSite}$id/json");
+    return await DioClient.getDio().post("${Collect.collectInSite}$id/json");
   }
 
  static Future<Response> unCollectArticle(int id) async {
-    return await Dio().post("${Collect.uncollect}$id/json");
+    return await DioClient.getDio().post("${Collect.uncollect}$id/json");
   }
 
  static Future<Response> collectOutArticles(
@@ -24,6 +27,6 @@ class CollectService {
       "author": author,
       "link": link,
     });
-    return await Dio().post(Collect.collectOutSite, data: formData);
+    return await DioClient.getDio().post(Collect.collectOutSite, data: formData);
   }
 }
