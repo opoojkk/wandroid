@@ -19,7 +19,7 @@ class KnowledgeSystemDetailPageState extends State<KnowledgeSystemDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("${widget.title}")),
+      appBar: AppBar(title: Text(widget.title)),
       body: ArticleListPage(request: widget.request),
     );
   }

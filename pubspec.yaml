@@ -46,6 +46,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   event_bus: ^2.0.0
   dio_cookie_manager: ^3.3.0
+  share_plus: ^11.1.0
+  webview_flutter_android: ^4.10.1
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -33,7 +35,7 @@ class MyApp extends StatelessWidget {
       title: '玩安卓',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.purple,
+          seedColor: Colors.cyan,
           brightness: Brightness.light,
         ),
         fontFamily: "noto",

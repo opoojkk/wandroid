@@ -67,7 +67,7 @@ class _KnowledgeSystemsPageState extends State<KnowledgeSystemsPage>
           padding: const EdgeInsets.only(left: 14, top: 20),
           child: Text(
             model.name,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         SizedBox(height: 10.0),

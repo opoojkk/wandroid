@@ -9,7 +9,7 @@ class BackBtn extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: Icon(Icons.arrow_back),
-      color: color,
+      color: Theme.of(context).appBarTheme.actionsIconTheme?.color,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         Navigator.maybePop(context);

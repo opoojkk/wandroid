@@ -119,7 +119,6 @@ class _MinePageState extends State<MinePage> {
         child: Text(
           'have a nice day!',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.black.withValues(alpha: 0.4)),
         ),
       ),
     );
@@ -136,7 +135,7 @@ class _MinePageState extends State<MinePage> {
         onTap: () {
           item.onTap?.call(context);
         },
-        borderRadius: BorderRadius.circular(8), // 波纹圆角
+        borderRadius: BorderRadius.circular(8),
         child: Container(
           height: 55,
           margin: EdgeInsets.symmetric(horizontal: 8),
@@ -144,15 +143,14 @@ class _MinePageState extends State<MinePage> {
             children: [
               Icon(
                 item.icon,
-                size: 20,
-                color: Colors.black.withValues(alpha: 0.6),
+                size: Theme.of(context).iconTheme.size,
+                color: Theme.of(context).iconTheme.color,
               ),
               const SizedBox(width: 16),
-              Text(item.title, style: const TextStyle(fontSize: 16)),
+              Text(item.title, style: Theme.of(context).textTheme.bodyLarge),
               const Spacer(),
               Icon(
                 Icons.keyboard_arrow_right,
-                color: Colors.black.withValues(alpha: 0.6),
               ),
             ],
           ),
@@ -227,14 +225,11 @@ class _MinePageState extends State<MinePage> {
           children: [
             Text(
               name,
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
               description,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.black.withValues(alpha: 0.5),
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),

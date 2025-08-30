@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../../model/articleList/ArticleItemModel.dart';
 import '../../model/articleList/ArticleListModel.dart';
-import '../../widget/EmptyHolder.dart';
 import '../../widget/QuickTopFloatBtn.dart';
+import '../../widget/bototmLoading.dart';
 import 'articleItemPage.dart';
 
-typedef Future<Response> RequestData(int page);
+typedef RequestData = Future<Response> Function(int page);
 typedef ShowQuickTop = void Function(bool show);
 
 class ArticleListPage extends StatefulWidget {
@@ -22,14 +22,14 @@ class ArticleListPage extends StatefulWidget {
   final bool? selfControl;
 
   const ArticleListPage({
-    Key? key,
+    super.key,
     this.header,
     required this.request,
     this.emptyMsg,
     this.selfControl = true,
     this.showQuickTop,
     this.keepAlive = false,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -39,9 +39,9 @@ class ArticleListPage extends StatefulWidget {
 
 class ArticleListPageState extends State<ArticleListPage>
     with AutomaticKeepAliveClientMixin {
-  List<ArticleItemModel> _listData = [];
+  final List<ArticleItemModel> _listData = [];
   final List<int> _listDataId = [];
-  GlobalKey<QuickTopFloatBtnState> _quickTopFloatBtnKey = new GlobalKey();
+  final GlobalKey<QuickTopFloatBtnState> _quickTopFloatBtnKey = new GlobalKey();
   int _listDataPage = -1;
   var _haveMoreData = true;
   double _screenHeight = 0;
@@ -72,11 +72,7 @@ class ArticleListPageState extends State<ArticleListPage>
         (null == widget.header ? 0 : 1) +
         (_haveMoreData ? 1 : 0);
     if (itemCount <= 0) {
-      return EmptyHolder(
-        msg: (widget.emptyMsg == null)
-            ? (_haveMoreData ? "Loading" : "not found")
-            : widget.emptyMsg,
-      );
+      return BottomLoadingIndicator();
     }
     listView = ListView.builder(
       physics: AlwaysScrollableScrollPhysics(),
@@ -99,11 +95,7 @@ class ArticleListPageState extends State<ArticleListPage>
 
     var body = NotificationListener<ScrollNotification>(
       onNotification: onScrollNotification,
-      child: RefreshIndicator(
-        child: listView,
-        // color: GlobalConfig.colorPrimary,
-        onRefresh: handleRefresh,
-      ),
+      child: RefreshIndicator(onRefresh: handleRefresh, child: listView),
     );
     return (null == widget.showQuickTop)
         ? Scaffold(
@@ -146,16 +138,14 @@ class ArticleListPageState extends State<ArticleListPage>
   }
 
   Widget _buildListViewItemLayout(BuildContext context, int index) {
-    if (_listData.length <= 0 || index < 0 || index >= _listData.length) {
+    if (_listData.isEmpty || index < 0 || index >= _listData.length) {
       return Container();
     }
     return ArticleItemPage(_listData[index]);
   }
 
   Widget _buildLoadMoreItem() {
-    return Center(
-      child: Padding(padding: EdgeInsets.all(10.0), child: Text("Loading ...")),
-    );
+    return BottomLoadingIndicator();
   }
 
   Future<Null> handleRefresh() async {
@@ -168,18 +158,13 @@ class ArticleListPageState extends State<ArticleListPage>
   bool isLoading = false;
 
   Future<Null> _loadNextPage() async {
-    if (isLoading || !this.mounted) {
+    if (isLoading || !mounted) {
       return null;
     }
     isLoading = true;
     _listDataPage++;
     var result = await _loadListData(_listDataPage);
-    //至少加载8个，如果初始化加载不足，则加载下一页,如果使用递归的话需要考虑中止操作
-    // if (_listData.length < 8) {
-    //   _listDataPage++;
-    //   result = await _loadListData(_listDataPage);
-    // }
-    if (this.mounted) setState(() {});
+    if (mounted) setState(() {});
     isLoading = false;
     return result;
   }
@@ -188,7 +173,7 @@ class ArticleListPageState extends State<ArticleListPage>
 
   ScrollController? getControllerForListView() {
     if (widget.selfControl ?? false) {
-      if (null == _controller) _controller = ScrollController();
+      _controller ??= ScrollController();
       return _controller;
     } else {
       return null;
@@ -200,15 +185,14 @@ class ArticleListPageState extends State<ArticleListPage>
     return widget.request(page).then((response) {
       var newList = ArticleListModel.fromJson(response.data).data.datas;
       var originListLength = _listData.length;
-      if (newList.length > 0) {
-        //        _listData.addAll(newList);
+      if (newList.isNotEmpty) {
         //防止添加进重复数据
-        newList.forEach((item) {
+        for (var item in newList) {
           if (!_listDataId.contains(item.id)) {
             _listData.add(item);
             _listDataId.add(item.id);
           }
-        });
+        }
       }
       _haveMoreData = originListLength != _listData.length;
     });
