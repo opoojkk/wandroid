@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Router;
+import 'package:flutter/services.dart';
 import 'package:wandroid/common/event/event.dart';
 import 'package:wandroid/common/event/eventbus.dart';
 
@@ -6,6 +7,7 @@ import '../../common/Router.dart' show Router;
 import '../../common/Snack.dart';
 import '../../common/User.dart';
 import '../../widget/BackBtn.dart';
+import '../../widget/loadingDialog.dart';
 
 class LoginRegisterPage extends StatefulWidget {
   const LoginRegisterPage({super.key});
@@ -18,6 +20,8 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
   OperateMode operateMode = OperateMode.login;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _psdController = TextEditingController();
+
+  bool isObscure = false;
 
   bool get login {
     return operateMode == OperateMode.login;
@@ -60,7 +64,16 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
         if (userNameStr.isEmpty || psdStr.isEmpty) {
           "账号和密码不能为空".showSnack(context);
         } else {
+          Loading.show(
+            context,
+            cancelable: true,
+            negative: "取消",
+            onNegative: () {
+              Loading.hide();
+            },
+          );
           callback(bool loginOK, String? errorMsg) {
+            Loading.hide();
             if (loginOK) {
               EventDriver.instance.eventBus.fire(LoginEvent(true));
               Router().back(context);
@@ -95,17 +108,33 @@ class _LoginRegisterPagePageState extends State<LoginRegisterPage> {
         border: OutlineInputBorder(),
         labelText: '用户名',
       ),
+      keyboardType: TextInputType.name,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+      ],
     );
   }
 
   Widget _buildPsdInputForm() {
     return TextField(
       controller: _psdController,
-      obscureText: true,
+      obscureText: isObscure,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+      ],
       decoration: InputDecoration(
+        suffixIcon: IconButton(
+          icon: Icon(isObscure ? Icons.visibility_off : Icons.visibility),
+          onPressed: () {
+            setState(() {
+              isObscure = !isObscure;
+            });
+          },
+        ),
         border: OutlineInputBorder(),
         labelText: '密码',
       ),
+      keyboardType: TextInputType.visiblePassword,
     );
   }
 
