@@ -190,6 +190,21 @@ class _WebViewPageState extends State<WebViewPage>
           onUrlChange: (_) async {
             await _injectScrollBridge();
           },
+          onNavigationRequest: (NavigationRequest request) async {
+            final uri = Uri.parse(request.url);
+
+            if (uri.scheme == 'http' || uri.scheme == 'https') {
+              return NavigationDecision.navigate;
+            }
+
+            // 其他情况（比如 weixin://, alipay://, intent://）
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } else {
+              debugPrint("无法处理的 deeplink: ${uri.toString()}");
+            }
+            return NavigationDecision.prevent;
+          },
         ),
       )
       ..loadRequest(Uri.parse(widget.getUrl()));
@@ -248,7 +263,7 @@ class _WebViewPageState extends State<WebViewPage>
   }
 
   Widget _buildStared(BuildContext context) {
-    if (widget.articleBean?.collect == null){
+    if (widget.articleBean?.collect == null) {
       return const SizedBox.shrink();
     }
     final isCollect = widget.articleBean!.collect ?? false;
@@ -309,7 +324,7 @@ class _WebViewPageState extends State<WebViewPage>
             Clipboard.setData(ClipboardData(text: widget.getUrl()));
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content:Text('链接已复制到剪贴板'),
+                content: Text('链接已复制到剪贴板'),
                 behavior: SnackBarBehavior.floating,
                 showCloseIcon: true,
               ),
